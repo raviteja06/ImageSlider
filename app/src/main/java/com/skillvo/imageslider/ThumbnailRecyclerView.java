@@ -44,6 +44,7 @@ public class ThumbnailRecyclerView extends RecyclerView.Adapter {
     public void onBindViewHolder(RecyclerView.ViewHolder holder, final int position) {
         holder.setIsRecyclable(false);
         final ViewHolderMain viewHolderMain = (ViewHolderMain) holder;
+        viewHolderMain.background.setBackgroundColor(Color.parseColor("#FFFFFF"));
         viewHolderMain.imageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -65,8 +66,14 @@ public class ThumbnailRecyclerView extends RecyclerView.Adapter {
                 }
             }
         });
-        if(position == selectedPosition && !set){
+        if (position == selectedPosition && !set) {
             set = true;
+            selectedItems.put(position, true);
+            viewHolderMain.background.setBackgroundColor(Color.parseColor("#FFC107"));
+            lastBackground = viewHolderMain.background;
+            lastCheckedPos = position;
+        }
+        if (imageObjects.get(position).isSelected()) {
             selectedItems.put(position, true);
             viewHolderMain.background.setBackgroundColor(Color.parseColor("#FFC107"));
             lastBackground = viewHolderMain.background;
@@ -117,10 +124,6 @@ public class ThumbnailRecyclerView extends RecyclerView.Adapter {
         notifyDataSetChanged();
         selectedPosition = position;
         set = false;
-    }
-
-    public void setSelfSelectedPosition(int position){
-        
     }
 }
 

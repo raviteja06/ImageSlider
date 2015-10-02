@@ -6,10 +6,20 @@ package com.skillvo.imageslider;
 public class ImageObject {
     private String image;
     private float rotate;
+    private boolean isSelected;
 
-    public ImageObject(String image, float rotate) {
+    public ImageObject(String image, float rotate, boolean isSelected) {
         this.image = image;
         this.rotate = rotate;
+        this.isSelected = isSelected;
+    }
+
+    public boolean isSelected() {
+        return isSelected;
+    }
+
+    public void setIsSelected(boolean isSelected) {
+        this.isSelected = isSelected;
     }
 
     public String getImage() {

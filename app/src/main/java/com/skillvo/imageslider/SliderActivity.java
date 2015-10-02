@@ -37,7 +37,7 @@ public class SliderActivity extends FragmentActivity {
             images = bundle.getStringArrayList("images");
         }
         for (String image : images) {
-            imageObjects.add(new ImageObject(image, 0));
+            imageObjects.add(new ImageObject(image, 0, false));
         }
         initListView();
         initRecyclerView();
@@ -88,7 +88,16 @@ public class SliderActivity extends FragmentActivity {
                 System.out.println(position);
                 if (recycler_view != null) {
                     recycler_view.smoothScrollToPosition(position);
-                    thumbnailRecyclerView.setSelfSelectedPosition(position);
+                    for (int tempI = 0; tempI < imageObjects.size(); tempI++) {
+                        ImageObject imageObject = imageObjects.get(tempI);
+                        if (position == tempI) {
+                            imageObject.setIsSelected(true);
+                        } else {
+                            imageObject.setIsSelected(false);
+                        }
+                        imageObjects.set(tempI, imageObject);
+                    }
+                    thumbnailRecyclerView.notifyDataSetChanged();
                 }
 
                 int childCount = mRecyclerView.getChildCount();
