@@ -1,28 +1,13 @@
 package com.skillvo.imageslider;
 
-import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.Color;
-import android.graphics.Point;
-import android.os.Build;
 import android.support.v4.app.FragmentActivity;
-import android.support.v4.view.ViewPager;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.view.Display;
 import android.view.View;
-import android.view.WindowManager;
-import android.widget.AdapterView;
-import android.widget.HorizontalScrollView;
 import android.widget.ImageButton;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.Toast;
 
 import com.lsjwzh.widget.recyclerviewpager.RecyclerViewPager;
-import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 
@@ -30,22 +15,21 @@ public class SliderActivity extends FragmentActivity {
     String title = "Skillvo";
     ArrayList<String> images = new ArrayList<>();
     ArrayList<ImageObject> imageObjects = new ArrayList<>();
-    HorizontalListView horizontalListView;
     ImageButton rotateLeft;
     ImageButton rotateRight;
     RecyclerViewPager mRecyclerView;
-    ThumbnailListView thumbnailListView;
+    ThumbnailRecyclerView thumbnailRecyclerView;
     LayoutAdapter layoutAdapter;
+    RecyclerView recycler_view;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_slider);
-        horizontalListView = (HorizontalListView) findViewById(R.id.hlvCustomList);
         rotateLeft = (ImageButton) findViewById(R.id.rotateLeft);
         rotateRight = (ImageButton) findViewById(R.id.rotateRight);
         mRecyclerView = (RecyclerViewPager) findViewById(R.id.list);
-        ;
+        recycler_view = (RecyclerView) findViewById(R.id.recyclerView);
 
         if (getIntent().getExtras() != null) {
             Bundle bundle = getIntent().getExtras();
@@ -56,39 +40,37 @@ public class SliderActivity extends FragmentActivity {
             imageObjects.add(new ImageObject(image, 0));
         }
         initListView();
-        initViewPager();
+        initRecyclerView();
 
         rotateLeft.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (thumbnailListView != null) {
-                    thumbnailListView.setRotate(mRecyclerView.getCurrentPosition(), true);
+                if (thumbnailRecyclerView != null) {
+                    thumbnailRecyclerView.setRotate(mRecyclerView.getCurrentPosition(), true);
                 }
-                if(layoutAdapter != null) {
+                if (layoutAdapter != null) {
                     layoutAdapter.setRotate(mRecyclerView.getCurrentPosition(), true);
                 }
-                if (horizontalListView.getChildAt(mRecyclerView.getCurrentPosition()) != null)
-                    horizontalListView.getChildAt(mRecyclerView.getCurrentPosition()).setBackgroundColor(Color.parseColor("#FFC107"));
             }
         });
 
         rotateRight.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (thumbnailListView != null) {
-                    thumbnailListView.setRotate(mRecyclerView.getCurrentPosition(), false);
+                if (thumbnailRecyclerView != null) {
+                    thumbnailRecyclerView.setRotate(mRecyclerView.getCurrentPosition(), false);
                 }
-                if(layoutAdapter != null) {
+                if (layoutAdapter != null) {
                     layoutAdapter.setRotate(mRecyclerView.getCurrentPosition(), false);
                 }
-                if (horizontalListView.getChildAt(mRecyclerView.getCurrentPosition()) != null)
-                    horizontalListView.getChildAt(mRecyclerView.getCurrentPosition()).setBackgroundColor(Color.parseColor("#FFC107"));
+//                if (horizontalListView.getChildAt(mRecyclerView.getCurrentPosition()) != null)
+//                    horizontalListView.getChildAt(mRecyclerView.getCurrentPosition()).setBackgroundColor(Color.parseColor("#FFC107"));
             }
         });
     }
 
     @SuppressWarnings("deprecation")
-    private void initViewPager() {
+    private void initRecyclerView() {
         layoutAdapter = new LayoutAdapter(this, imageObjects);
         LinearLayoutManager layout = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
         mRecyclerView.setLayoutManager(layout);//setLayoutManager
@@ -102,17 +84,11 @@ public class SliderActivity extends FragmentActivity {
 
             @Override
             public void onScrolled(RecyclerView recyclerView, int i, int i2) {
-                if (horizontalListView != null) {
-                    horizontalListView.scrollTo(mRecyclerView.getCurrentPosition());
-                    for (int f = 0; f < imageObjects.size(); f++) {
-                        if (f == mRecyclerView.getCurrentPosition()) {
-                            if (horizontalListView.getChildAt(mRecyclerView.getCurrentPosition()) != null)
-                                horizontalListView.getChildAt(mRecyclerView.getCurrentPosition()).setBackgroundColor(Color.parseColor("#FFC107"));
-                        } else {
-                            if (horizontalListView.getChildAt(f) != null)
-                                horizontalListView.getChildAt(f).setBackgroundColor(Color.parseColor("#FFFFFF"));
-                        }
-                    }
+                int position = mRecyclerView.getCurrentPosition();
+                System.out.println(position);
+                if (recycler_view != null) {
+                    recycler_view.smoothScrollToPosition(position);
+                    thumbnailRecyclerView.setSelfSelectedPosition(position);
                 }
 
                 int childCount = mRecyclerView.getChildCount();
@@ -163,24 +139,16 @@ public class SliderActivity extends FragmentActivity {
     }
 
     private void initListView() {
-        thumbnailListView = new ThumbnailListView(this, imageObjects);
-        horizontalListView.setAdapter(thumbnailListView);
-        horizontalListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                if (mRecyclerView != null)
-                    mRecyclerView.scrollToPosition(position);
+        thumbnailRecyclerView = new ThumbnailRecyclerView(this, imageObjects);
+        recycler_view.removeAllViews();
+        recycler_view.setHasFixedSize(true);
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
+        recycler_view.setLayoutManager(linearLayoutManager);
+        recycler_view.setAdapter(thumbnailRecyclerView);
+    }
 
-                for (int i = 0; i < imageObjects.size(); i++) {
-                    if (i == position) {
-                        if (horizontalListView.getChildAt(position) != null)
-                            horizontalListView.getChildAt(position).setBackgroundColor(Color.parseColor("#FFC107"));
-                    } else {
-                        if (horizontalListView.getChildAt(i) != null)
-                            horizontalListView.getChildAt(i).setBackgroundColor(Color.parseColor("#FFFFFF"));
-                    }
-                }
-            }
-        });
+    public void click(int position) {
+        if (mRecyclerView != null)
+            mRecyclerView.scrollToPosition(position);
     }
 }
